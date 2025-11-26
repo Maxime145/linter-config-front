@@ -1,27 +1,27 @@
+import angular from '@angular-eslint/eslint-plugin';
+import angularTemplate from '@angular-eslint/eslint-plugin-template';
 import js from '@eslint/js';
-import typescript from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
-import prettierPlugin from 'eslint-plugin-prettier';
 import importPlugin from 'eslint-plugin-import-x';
+import prettierPlugin from 'eslint-plugin-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import vue from 'eslint-plugin-vue';
-import vueParser from 'vue-eslint-parser';
-import angular from '@angular-eslint/eslint-plugin';
-import angularTemplate from '@angular-eslint/eslint-plugin-template';
 import globals from 'globals';
+import typescript from 'typescript-eslint';
+import vueParser from 'vue-eslint-parser';
 
 const baseConfig = [
   js.configs.recommended,
   ...typescript.configs.recommended,
   {
     languageOptions: {
-      ecmaVersion: 2024,
+      ecmaVersion: 2025,
       sourceType: 'module',
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals.es2024,
+        ...globals.es2025,
       },
     },
     plugins: {
@@ -47,7 +47,7 @@ const baseConfig = [
           varsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/consistent-type-imports': [
         'error',
@@ -61,7 +61,7 @@ const baseConfig = [
         'error',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'type'],
-          'newlines-between': 'always',
+          'newlines-between': 'always', // Lié au groups au dessus. Créé un espace entre chaque groupe
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
@@ -117,7 +117,7 @@ const vueConfig = [
       parserOptions: {
         parser: typescript.parser,
         extraFileExtensions: ['.vue'],
-        ecmaVersion: 2024,
+        ecmaVersion: 2025,
         sourceType: 'module',
       },
     },
@@ -183,20 +183,17 @@ const angularConfig = [
   },
 ];
 
+const prettierConfig = [
+  prettier,
+  {
+    ignores: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.next/**', '**/coverage/**'],
+  },
+];
+
 export default [
   ...baseConfig,
   ...reactConfig,
   ...vueConfig,
   ...angularConfig,
-  prettier, // Doit être en dernier
-  {
-    ignores: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/.next/**',
-      '**/coverage/**',
-      '**/*.config.js',
-    ],
-  },
+  ...prettierConfig, // La config de prettier doit être en dernière position
 ];

@@ -1,34 +1,29 @@
 #!/usr/bin/env node
 
 import { existsSync } from 'fs';
-import { mkdir, readFile, writeFile, unlink } from 'fs/promises';
+import { mkdir, readFile, readdir, writeFile, unlink } from 'fs/promises';
 import { dirname, join } from 'path';
 
-import { log } from 'src/utils/logs.util';
+import { log } from '../utils/logs.util.js';
 
 const targetRoot = process.cwd();
 
-const fileExists = (path) => existsSync(path);
+const resetConfig = async (files = []) => {
+  const prettierConfigFiles = files.filter((filename) => filename.includes('prettier'));
+  const eslintConfigFiles = files.filter((filename) => filename.includes('eslint'));
+  const stylelintConfigFiles = files.filter((filename) => filename.includes('stylelint'));
+
+  const configFiles = [...prettierConfigFiles, ...eslintConfigFiles, ...stylelintConfigFiles];
+
+  for (const configFile of configFiles) {
+    const configPath = join(targetRoot, configFile);
+
+    await unlink(configPath);
+    log(`Suppression du fichier ${configFile}`, 'red');
+  }
+};
 
 const prettierSettings = async (ideaDir) => {
-  const prettierConfigFiles = [
-    '.prettierrc',
-    '.prettierrc.json',
-    '.prettierrc.js',
-    '.prettierrc.yml',
-    '.prettierrc.toml',
-    'prettier.config.js',
-    'prettier.config.cjs',
-  ];
-
-  for (const configFile of prettierConfigFiles) {
-    const configPath = join(targetRoot, configFile);
-    if (fileExists(configPath)) {
-      await unlink(configPath);
-      log(`Suppression du fichier ${configFile}`, 'red');
-    }
-  }
-
   const prettierXml = `<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="PrettierConfiguration">
@@ -46,24 +41,6 @@ const prettierSettings = async (ideaDir) => {
 };
 
 const eslintSettings = async (ideaDir) => {
-  const eslintConfigFiles = [
-    '.eslintrc',
-    '.eslintrc.json',
-    '.eslintrc.js',
-    '.eslintrc.cjs',
-    '.eslintrc.yml',
-    '.eslintrc.yaml',
-    '.eslintignore',
-  ];
-
-  for (const configFile of eslintConfigFiles) {
-    const configPath = join(targetRoot, configFile);
-    if (fileExists(configPath)) {
-      await unlink(configPath);
-      log(`Suppression du fichier ${configFile} réussi`, 'red');
-    }
-  }
-
   const eslintXml = `<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EslintConfiguration">
@@ -79,24 +56,6 @@ const eslintSettings = async (ideaDir) => {
 };
 
 const stylelintSettings = async (ideaDir) => {
-  const stylelintConfigFiles = [
-    '.stylelintrc',
-    '.stylelintrc.json',
-    '.stylelintrc.js',
-    '.stylelintrc.cjs',
-    '.stylelintrc.yml',
-    '.stylelintrc.yaml',
-    '.stylelintignore',
-  ];
-
-  for (const configFile of stylelintConfigFiles) {
-    const configPath = join(targetRoot, configFile);
-    if (fileExists(configPath)) {
-      await unlink(configPath);
-      log(`Suppression du fichier ${configFile}`, 'red');
-    }
-  }
-
   const stylelintXml = `<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="StylelintConfiguration">
@@ -163,40 +122,6 @@ const codeStyleSettings = async (codeStylesDir) => {
 };
 
 // 1.
-const createJsFilesConfig = async () => {
-  const files = [
-    {
-      target: 'eslint.config.js',
-      content: `import config from 'config-linter-front/eslint';
-
-export default config;
-`,
-    },
-    {
-      target: 'prettier.config.js',
-      content: `import config from 'config-linter-front/prettier';
-
-export default config;
-`,
-    },
-    {
-      target: 'stylelint.config.js',
-      content: `import config from 'config-linter-front/stylelint';
-
-export default config;
-`,
-    },
-  ];
-
-  for (const file of files) {
-    const targetPath = join(targetRoot, file.target);
-    await writeFile(targetPath, file.content, 'utf-8');
-
-    log(`Creation : ${targetPath}`, 'green');
-  }
-};
-
-// 2.
 const createVSCodeSettings = async () => {
   const targetPath = join(targetRoot, '.vscode', 'settings.json');
 
@@ -236,7 +161,6 @@ const createVSCodeSettings = async () => {
 
   log('Creation .vscode/settings.json', 'green');
 };
-
 const createVSCodeExtensions = async () => {
   const targetPath = join(targetRoot, '.vscode', 'extensions.json');
 
@@ -254,7 +178,7 @@ const createVSCodeExtensions = async () => {
   log('Creation .vscode/extensions.json', 'green');
 };
 
-// 3.
+// 2.
 const createIntellijSettings = async () => {
   const ideaDir = join(targetRoot, '.idea');
   await mkdir(ideaDir, { recursive: true });
@@ -270,7 +194,7 @@ const createIntellijSettings = async () => {
   await codeStyleSettings(codeStylesDir);
 };
 
-// 4.
+// 3.
 async function updateGitignore() {
   const gitignorePath = join(targetRoot, '.gitignore');
 
@@ -283,7 +207,7 @@ async function updateGitignore() {
     '!.idea/codeStyles/',
   ];
 
-  if (fileExists(gitignorePath)) {
+  if (existsSync(gitignorePath)) {
     let content = await readFile(gitignorePath, 'utf-8');
 
     if (!content.includes('.idea/')) {
@@ -299,28 +223,65 @@ async function updateGitignore() {
   }
 }
 
+// 4.
+const createJsFilesConfig = async () => {
+  const files = [
+    {
+      target: 'eslint.config.js',
+      content: `import config from 'config-linter-front/eslint';
+
+export default config;
+`,
+    },
+    {
+      target: 'prettier.config.js',
+      content: `import config from 'config-linter-front/prettier';
+
+export default config;
+`,
+    },
+    {
+      target: 'stylelint.config.js',
+      content: `import config from 'config-linter-front/stylelint';
+
+export default config;
+`,
+    },
+  ];
+
+  for (const file of files) {
+    const targetPath = join(targetRoot, file.target);
+    await writeFile(targetPath, file.content, 'utf-8');
+
+    log(`Creation : ${targetPath}`, 'green');
+  }
+};
+
 const main = async () => {
   log('\n Installation de config-linter-front...\n', 'blue');
 
   try {
-    log('1. Creation des fichiers de config...', 'blue');
-    await createJsFilesConfig();
+    log('\n 0. Suppression des précédents fichiers de config.', 'blue');
+    const files = await readdir(targetRoot);
+    await resetConfig(files);
 
-    log('\n 2. Creation des réglages VS Code...', 'blue');
+    log('\n 1. Création des réglages VS Code...', 'blue');
     await createVSCodeSettings();
     await createVSCodeExtensions();
 
-    log('\n 3. Creation des réglages IntelliJ...', 'blue');
-    await createIntellijSettings();
+    log('\n 2. Création des réglages IntelliJ...', 'blue');
+    await createIntellijSettings(files);
 
-    log('\n 4. Mise a jour du .gitignore...', 'blue');
+    log('\n 3. Mise à jour du .gitignore...', 'blue');
     await updateGitignore();
+
+    log('4. Création des fichiers de config du linter...', 'blue');
+    await createJsFilesConfig();
 
     log('\n --- Installation complete ! ---\n', 'green');
     log(' Étape suivante :', 'blue');
-    log('  1. Installer les dépendances : npm install');
-    log('  2. Pour VS Code: Installer les extensions recommandées');
-    log('  3. Pour IntelliJ : File → Invalidate Caches / Restart\n');
+    log('  1. Pour VS Code: Installer les extensions recommandées');
+    log('  2. Pour IntelliJ : File → Invalidate Caches / Restart\n');
   } catch (error) {
     log(`\n Erreur : ${error.message}\n`, 'red');
     process.exit(1);

@@ -35,7 +35,7 @@ export default {
           'variants',
           'responsive',
           'screen',
-          'utility'
+          'utility',
         ],
       },
     ],
@@ -94,8 +94,6 @@ export default {
         ],
       },
     },
-
-    // TODO : React
   ],
 
   ignoreFiles: [

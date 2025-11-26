@@ -5,7 +5,7 @@ Support : **React 18+**, **Vue 3**, **Angular 17+**, **TypeScript 5+**, **Tailwi
 ## Prérequis
 
 ```bash
-npm i -D eslint@^9 prettier@^3 stylelint@^16
+npm i -D eslint@^9 prettier@^3 stylelint@^16 prettier-plugin-tailwindcss@0.7.1
 ```
 
 Il vous faudra également un compte Alltech de configuré sur votre poste.
@@ -15,11 +15,9 @@ Il vous faudra également un compte Alltech de configuré sur votre poste.
 ### Dans votre projet
 
 ```bash
-# En HTTPS
-npm i -D git+https://github.com/Alltech-Groupe/config-linter-front.git
-
-# Avec SSH
-npm i -D git+ssh://git@github.com:Alltech-Groupe/config-linter-front.git
+# Projet public sur mon github perso 
+# TODO : Fork le projet pour le mettre sur celui d'Alltech
+npm i -D git+https://github.com/Maxime145/linter-config-front.git
 ```
 
 ### Configuration
