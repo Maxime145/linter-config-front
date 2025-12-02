@@ -33,11 +33,12 @@ const prettierSettings = async (ideaDir) => {
   </component>
 </project>`;
 
-  const prettierPath = join(ideaDir, 'prettier.xml');
+  const configPath = join(ideaDir, 'prettier.xml');
 
-  await writeFile(prettierPath, prettierXml);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, prettierXml);
 
-  log('Creation .idea/prettier.xml', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 const eslintSettings = async (ideaDir) => {
@@ -48,11 +49,12 @@ const eslintSettings = async (ideaDir) => {
   </component>
 </project>`;
 
-  const eslintPath = join(ideaDir, 'jsLinters/eslint.xml');
+  const configPath = join(ideaDir, 'jsLinters', 'eslint.xml');
 
-  await writeFile(eslintPath, eslintXml);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, eslintXml);
 
-  log('Creation .idea/eslintPlugin.xml', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 const stylelintSettings = async (ideaDir) => {
@@ -64,11 +66,12 @@ const stylelintSettings = async (ideaDir) => {
   </component>
 </project>`;
 
-  const stylelintPath = join(ideaDir, 'stylesheetLinters/stylelint.xml');
+  const configPath = join(ideaDir, 'stylesheetLinters', 'stylelint.xml');
 
-  await writeFile(stylelintPath, stylelintXml);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, stylelintXml);
 
-  log('Creation .idea/eslintPlugin.xml', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 const projectSettings = async (codeStylesDir) => {
@@ -100,11 +103,12 @@ const projectSettings = async (codeStylesDir) => {
   </code_scheme>
 </component>`;
 
-  const projectXmlPath = join(codeStylesDir, 'Project.xml');
+  const configPath = join(codeStylesDir, 'Project.xml');
 
-  await writeFile(projectXmlPath, projectXml);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, projectXml);
 
-  log('Creation .idea/codeStyles/Project.xml', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 const codeStyleSettings = async (codeStylesDir) => {
@@ -114,16 +118,17 @@ const codeStyleSettings = async (codeStylesDir) => {
   </state>
 </component>`;
 
-  const codeStyleSettingsPath = join(codeStylesDir, 'codeStyleConfig.xml');
+  const configPath = join(codeStylesDir, 'codeStyleConfig.xml');
 
-  await writeFile(codeStyleSettingsPath, codeStyleSettingsXml);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, codeStyleSettingsXml);
 
-  log('Creation .idea/codeStyles/codeStyleConfig.xml', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 // 1.
 const createVSCodeSettings = async () => {
-  const targetPath = join(targetRoot, '.vscode', 'settings.json');
+  const configPath = join(targetRoot, '.vscode', 'settings.json');
 
   const settings = {
     'editor.formatOnSave': true,
@@ -156,13 +161,14 @@ const createVSCodeSettings = async () => {
     'files.trimTrailingWhitespace': true,
   };
 
-  await mkdir(dirname(targetPath), { recursive: true });
-  await writeFile(targetPath, `${JSON.stringify(settings, null, 2)}\n`);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, `${JSON.stringify(settings, null, 2)}\n`);
 
-  log('Creation .vscode/settings.json', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
+
 const createVSCodeExtensions = async () => {
-  const targetPath = join(targetRoot, '.vscode', 'extensions.json');
+  const configPath = join(targetRoot, '.vscode', 'extensions.json');
 
   const extensions = {
     recommendations: [
@@ -172,23 +178,21 @@ const createVSCodeExtensions = async () => {
     ],
   };
 
-  await mkdir(dirname(targetPath), { recursive: true });
-  await writeFile(targetPath, `${JSON.stringify(extensions, null, 2)}\n`);
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, `${JSON.stringify(extensions, null, 2)}\n`);
 
-  log('Creation .vscode/extensions.json', 'green');
+  log(`Creation ${configPath}`, 'green');
 };
 
 // 2.
 const createIntellijSettings = async () => {
   const ideaDir = join(targetRoot, '.idea');
-  await mkdir(ideaDir, { recursive: true });
 
   await prettierSettings(ideaDir);
   await eslintSettings(ideaDir);
   await stylelintSettings(ideaDir);
 
   const codeStylesDir = join(ideaDir, 'codeStyles');
-  await mkdir(codeStylesDir, { recursive: true });
 
   await projectSettings(codeStylesDir);
   await codeStyleSettings(codeStylesDir);
