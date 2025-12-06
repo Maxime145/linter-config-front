@@ -53,10 +53,8 @@
     "./stylelint": "./stylelint.config.js"
   },
   "files": [
-    "prettier.config.js",
-    "eslint.config.js",
-    "stylelint.config.js",
-    "./src/scripts/"
+    "*.config.js",
+    "src/"
   ],
   "engines": {
     "node": ">=24.0.0"
